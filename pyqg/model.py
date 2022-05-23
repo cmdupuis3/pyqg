@@ -550,9 +550,6 @@ class Model:
         self._do_friction()
         # apply friction
 
-        self._do_external_forcing()
-        # apply external forcing
-
         if self.uv_parameterization is not None:
             self._do_uv_subgrid_parameterization()
             # apply velocity subgrid forcing term, if present
@@ -640,9 +637,6 @@ class Model:
 
     def _filter(self, q):
         return self.filtr * q
-
-    def _do_external_forcing(self):
-        pass
 
     # logger
     def _initialize_logger(self):

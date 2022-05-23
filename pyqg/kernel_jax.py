@@ -1,28 +1,78 @@
-#from __future__ import division
-import numpy as np
-import warnings
-
-import jax.numpy as jnp
-
 class PseudoSpectralKernel:
     
-    def __init__(self, nz, ny, nx, fftw_num_threads=1,
-            has_q_param=0, has_uv_param=0):
+    def _empty_real(self):
+        """Allocate a space-grid-sized variable for use with fftw transformations."""
+        return jnp.zeros((self.nz, self.ny, self.nx), jnp.float32) # float64
+
+    def _empty_com(self):
+        """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
+        return jnp.zeros((self.nz, self.nl, self.nk), jnp.complex64) # complex128
+    
+    def __init__(self, nz, ny, nx, fftw_num_threads=1):
         
         self.nz = nz
         self.ny = ny
         self.nx = nx
         self.nl = ny
-        self.nk = nx/2 + 1
-        self.a     = np.zeros((self.nz, self.nz, self.nl, self.nk), jnp.complex128)
-        self.kk    = np.zeros((self.nk), jnp.float64)
-        self._ik   = np.zeros((self.nk), jnp.complex128)
-        self.ll    = np.zeros((self.nl), jnp.float64)
-        self._il   = np.zeros((self.nl), jnp.complex128)
-        self._k2l2 = np.zeros((self.nl, self.nk), jnp.float64)
+        self.nk = int(nx/2 + 1)
+        self.a     = jnp.zeros((self.nz, self.nz, self.nl, self.nk), jnp.complex128)
+        self.kk    = jnp.zeros((self.nk), jnp.float64)
+        self._ik   = jnp.zeros((self.nk), jnp.complex128)
+        self.ll    = jnp.zeros((self.nl), jnp.float64)
+        self._il   = jnp.zeros((self.nl), jnp.complex128)
+        self._k2l2 = jnp.zeros((self.nl, self.nk), jnp.float64)
         
         
-    #### other stuff ####
+        
+        self.q   = self._empty_real()
+        self.qh  = self._empty_com()
+        self.ph  = self._empty_com()
+        
+        self.u   = self._empty_real()
+        self.uh  = self._empty_com()
+        self.v   = self._empty_real()
+        self.vh  = self._empty_com()
+        
+        self.uq  = self._empty_real()
+        self.uqh = self._empty_com()
+        self.vq  = self._empty_real()
+        self.vqh = self._empty_com()
+        
+        
+        # variables for subgrid parameterizations
+        
+        # if has_q_param:
+        self.dq  = self._empty_real()
+        self.dqh = self._empty_com()
+        
+        # if has_uv_param:
+        self.du  = self._empty_real()
+        self.dv  = self._empty_real()
+        self.duh = self._empty_com()
+        self.dvh = self._empty_com()
+        
+
+        # dummy variables for diagnostic ffts
+        self.dfftin   = self._empty_real()
+        self.dfftout  = self._empty_com()
+        self.difftin  = self._empty_com()
+        self.difftout = self._empty_real()
+        
+        
+        # time stuff
+        self.dt = 0.0
+        self.t  = 0.0
+        self.tc = 0
+        self.ablevel = 0
+
+        # friction
+        self.rek = 0.0
+
+        # the tendency
+        self.dqhdt    = self._empty_com()
+        self.dqhdt_p  = self._empty_com()
+        self.dqhdt_pp = self._empty_com()
+
 
     def fft(self, x):
         return jnp.fft.rfftn(x, axes=(-2,-1))
@@ -34,7 +84,7 @@ class PseudoSpectralKernel:
     def _invert(self):
 
         # invert qh to find ph
-        self.ph = jnp.apply_over_axes(jnp.sum, jnp.multiply(self.a, self.qh), [0])
+        self.ph = jnp.apply_over_axes(jnp.sum, self.a * self.qh, [0])
 
         # calculate spectral velocities
         self.uh = jnp.multiply(self.ph, self._il, axis=1)
@@ -57,10 +107,10 @@ class PseudoSpectralKernel:
 
         # spectral divergence
         # overwrite the tendency, since the forcing gets called after
-        self.dqhdt[k,j,i] = -( jnp.multiply(self.uqh, self._ik, axis=2) +
-                               jnp.multiply(self.vqh, self._il, axis=1) +
-                               jnp.multiply(self.ph, self._ikQy, axes = [0,2]) # check axes!
-                             )
+        self.dqhdt = -( jnp.multiply(self.uqh, self._ik, axis=2) +
+                        jnp.multiply(self.vqh, self._il, axis=1) +
+                        jnp.multiply(self.ph,  self._ikQy, axes = [0,2]) # check axes!
+                      )
         return
 
     def _do_uv_subgrid_parameterization(self):
@@ -132,21 +182,3 @@ class PseudoSpectralKernel:
         self.t += self.dt
         
         return
-
-    
-def tendency_forward_euler(dt, dqdt):
-    """Compute tendency using forward euler timestepping."""
-    return dt * dqdt
-
-def tendency_ab2(dt, dqdt, dqdt_p):
-    """Compute tendency using Adams Bashforth 2nd order timestepping."""
-    DT1 = 1.5*dt
-    DT2 = -0.5*dt
-    return DT1 * dqdt + DT2 * dqdt_p
-
-def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
-    """Compute tendency using Adams Bashforth 3nd order timestepping."""
-    DT1 = 23/12.*dt
-    DT2 = -16/12.*dt
-    DT3 = 5/12.*dt
-    return DT1 * dqdt + DT2 * dqdt_p + DT3 * dqdt_pp
