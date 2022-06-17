@@ -68,7 +68,8 @@ class KernelState(KernelFFT):
     
     @cached_property
     def q(self):
-        return self.ifft(self.qh)
+        qh_temp = self.qh
+        return self.ifft(qh_temp)  # this destroys qh_temp
     
     @cached_property
     def u(self):
@@ -219,12 +220,12 @@ class PSKernel(KernelFFT):
         self.dqhdt_p = self.dqhdt
 
         # do FFT of new qh
-        self.q = self.ifft(self.qh) # this destroys qh, need to assign again
+        self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
+        self.q = self.state.q 
 
         self.tc += 1
         self.t += self.dt
         
-        self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
         
         return
     
