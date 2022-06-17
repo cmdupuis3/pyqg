@@ -4,6 +4,8 @@ import logging
 import warnings
 import inspect
 
+from abc import ABC, abstractmethod
+
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from .parameterizations import Parameterization
@@ -19,7 +21,7 @@ try:
 except ImportError:
     pass
 
-class Model(PseudoSpectralKernel):
+class Model(ABC, PseudoSpectralKernel):
     """A generic pseudo-spectral inversion model.
 
     Attributes
@@ -256,6 +258,11 @@ class Model(PseudoSpectralKernel):
         self._initialize_time()
         self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
+
+    @property
+    @abstractmethod
+    def ikQy(self):
+        pass
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
