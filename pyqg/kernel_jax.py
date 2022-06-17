@@ -21,3 +21,13 @@ class KernelGrid:
     
     def __post_init__():
         self.nk = int(self.nx/2 +1)
+
+
+# Mixin pattern; we could make this abstract and then have multiple FFT types
+class KernelFFT:
+    
+    def fft(self, x):
+        return jnp.fft.rfftn(x, axes=(-2,-1))
+
+    def ifft(self, x):
+        return jnp.fft.irfftn(x, axes=(-2,-1))
