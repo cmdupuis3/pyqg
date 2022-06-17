@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 @dataclass
 class KernelGrid:
+    """
+    Grid information needed by Kernel classes.
+    """
     nz: int
     ny: int
     nx: int
@@ -25,6 +28,9 @@ class KernelGrid:
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
 class KernelFFT:
+    """
+    Binding layer for Jax FFTs.
+    """
     
     def fft(self, x):
         return jnp.fft.rfftn(x, axes=(-2,-1))
@@ -32,8 +38,15 @@ class KernelFFT:
     def ifft(self, x):
         return jnp.fft.irfftn(x, axes=(-2,-1))
 
-
+    
 class KernelState(KernelFFT):
+    """
+    A class to track the instantaneous state of the kernel. 
+    DO NOT MAKE IT STATEFUL OR MUCH PAIN WILL ENSUE! The 
+    statefulness is supposed to quarantined in PSKernel.
+    This is structured for lazy evaluation, but calling 
+    `state.dqhdt` should calculate everything.
+    """
     
     def __init__(self, qh, Ubg, a, grid):
         self.qh = qh
@@ -161,7 +174,7 @@ class PSKernel(KernelFFT):
         self.ablevel = 0
         
         # the tendency
-        self.dqhdt    = self._empty_com()
+        self.dqhdt    = self._empty_com() # need zeros to start 
         self.dqhdt_p  = self._empty_com()
         self.dqhdt_pp = self._empty_com()
         
@@ -175,7 +188,6 @@ class PSKernel(KernelFFT):
     
     def _forward_timestep(self):
         """Step forward based on tendencies"""
-        #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
 
         # Note that Adams-Bashforth is not self-starting
         if self.ablevel==0:
@@ -205,7 +217,6 @@ class PSKernel(KernelFFT):
 
         self.dqhdt_pp = self.dqhdt_p
         self.dqhdt_p = self.dqhdt
-        #self.dqhdt = 0.0
 
         # do FFT of new qh
         self.q = self.ifft(self.qh) # this destroys qh, need to assign again
@@ -216,3 +227,21 @@ class PSKernel(KernelFFT):
         self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
         
         return
+    
+    
+# def tendency_forward_euler(dt, dqdt):
+#     """Compute tendency using forward euler timestepping."""
+#     return dt * dqdt
+
+# def tendency_ab2(dt, dqdt, dqdt_p):
+#     """Compute tendency using Adams Bashforth 2nd order timestepping."""
+#     DT1 = 1.5*dt
+#     DT2 = -0.5*dt
+#     return DT1 * dqdt + DT2 * dqdt_p
+
+# def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
+#     """Compute tendency using Adams Bashforth 3nd order timestepping."""
+#     DT1 = 23/12.*dt
+#     DT2 = -16/12.*dt
+#     DT3 = 5/12.*dt
+#     return DT1 * dqdt + DT2 * dqdt_p + DT3 * dqdt_pp
