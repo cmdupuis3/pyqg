@@ -135,7 +135,7 @@ class KernelState(KernelFFT):
             if uv_parameterization is not None:
                 if q_parameterization is not None:
                     return compose(compose(uv_par, q_par), fric)(adv)
-                else
+                else:
                     return compose(uv_par, fric)(adv)
             elif q_parameterization is not None:
                 return compose(q_par, fric)(adv)
@@ -145,7 +145,7 @@ class KernelState(KernelFFT):
             if uv_parameterization is not None:
                 if q_parameterization is not None:
                     return compose(uv_par, q_par)(adv)
-                else
+                else:
                     return uv_par(adv)
             elif q_parameterization is not None:
                 return q_par(adv)
@@ -227,7 +227,7 @@ class PSKernel(KernelFFT):
 
         # do FFT of new qh
         self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
-        self.q = self.state.q 
+        self.q = self.state.q # don't think we need this, but idk
 
         self.tc += 1
         self.t += self.dt
