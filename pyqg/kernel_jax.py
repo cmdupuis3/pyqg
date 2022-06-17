@@ -179,6 +179,12 @@ class PSKernel(KernelFFT):
         self.dqhdt_p  = self._empty_com()
         self.dqhdt_pp = self._empty_com()
         
+    # Only these should be properties of this class; other state
+    # variables should come from calls to kernel.state
+    @property
+    def q(self):
+        return self.state.q
+        
     @property
     def qh(self):
         return self.state.qh
