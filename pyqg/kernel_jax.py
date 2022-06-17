@@ -8,13 +8,16 @@ class KernelGrid:
     ny: int
     nx: int
     nl: int
-    nk: int = field(init=False)
     
     kk: int
     ik: int
     ll: int
     il: int
     k2l2: int
+    
+    ikQy: int
+    
+    nk: int = field(init=False)
     
     def __post_init__():
         self.nk = int(self.nx/2 +1)
