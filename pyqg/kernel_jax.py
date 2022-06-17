@@ -41,7 +41,7 @@ class KernelFFT:
     
 class KernelState(KernelFFT):
     """
-    A class to track the instantaneous state of the kernel. 
+    A class to track an instantaneous state of the kernel. 
     DO NOT MAKE IT STATEFUL OR MUCH PAIN WILL ENSUE! The 
     statefulness is supposed to quarantined in PSKernel.
     This is structured for lazy evaluation, but calling 
@@ -89,7 +89,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def _du_dv(self):
-        return self.uv_parameterization(self)
+        return self.uv_parameterization()
     
     @cached_property
     def du(self):
@@ -109,7 +109,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def dq(self):
-        return self.q_parameterization(self)
+        return self.q_parameterization()
     
     @cached_property
     def dqh(self):
