@@ -10,20 +10,25 @@ class KernelGrid:
     nz: int
     ny: int
     nx: int
-    nl: int
     
     kk: int
     ik: int
     ll: int
     il: int
-    k2l2: int
     
     ikQy: int
     
-    nk: int = field(init=False)
+    nk:   int = field(init=False)
+    nl:   int = field(init=False)
+    k2l2: int = field(init=False)
     
     def __post_init__():
+        self.nl = self.ny
         self.nk = int(self.nx/2 +1)
+        
+        for j in range(self.nl):
+            for i in range(self.nk):
+                self._k2l2[j,i] = self.kk[i]**2 + self.ll[j]**2
 
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
@@ -232,9 +237,14 @@ class PSKernel(KernelFFT):
         self.tc += 1
         self.t += self.dt
         
-        
         return
     
+    def call(diagnostics):
+        _ = self.dqhdt
+        diagnostics()
+        self._forward_timestep()
+        
+        
     
 # def tendency_forward_euler(dt, dqdt):
 #     """Compute tendency using forward euler timestepping."""
