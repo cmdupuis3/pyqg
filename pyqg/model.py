@@ -7,7 +7,7 @@ import inspect
 from abc import ABC, abstractmethod
 
 from .errors import DiagnosticNotFilledError
-from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
+from .kernel_jax import PSKernel
 from .parameterizations import Parameterization
 try:
     import mkl
@@ -21,7 +21,7 @@ try:
 except ImportError:
     pass
 
-class Model(ABC, PseudoSpectralKernel):
+class Model(ABC):
     """A generic pseudo-spectral inversion model.
 
     Attributes
@@ -102,6 +102,7 @@ class Model(ABC, PseudoSpectralKernel):
 
     def __init__(
         self,
+        kernel_type="jax",
         # grid size parameters
         nz=1,
         nx=64,                     # grid resolution
@@ -215,9 +216,14 @@ class Model(ABC, PseudoSpectralKernel):
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
-        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
-                has_q_param=int(q_parameterization is not None),
-                has_uv_param=int(uv_parameterization is not None))
+        if kernel_type == "jax":
+            self.kernel = PSKernel(self.qh, self.Ubg, self.a, grid)
+        elif kernel_type == "cython":
+            self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
+                                    has_q_param=int(q_parameterization is not None),
+                                    has_uv_param=int(uv_parameterization is not None))
+        else:
+            raise ValueError(f"unknown kernel type {kernel_type}; valid options are \"jax\" or \"cython\".")
 
         self.L = L
         self.W = W
@@ -261,7 +267,7 @@ class Model(ABC, PseudoSpectralKernel):
 
     @property
     @abstractmethod
-    def ikQy(self):
+    def Qy(self):
         pass
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
@@ -412,29 +418,7 @@ class Model(ABC, PseudoSpectralKernel):
 
     def _step_forward(self):
 
-        self._invert()
-        # find streamfunction from pv
-
-        self._do_advection()
-        # use streamfunction to calculate advection tendency
-
-        self._do_friction()
-        # apply friction
-
-        if self.uv_parameterization is not None:
-            self._do_uv_subgrid_parameterization()
-            # apply velocity subgrid forcing term, if present
-
-        if self.q_parameterization is not None:
-            self._do_q_subgrid_parameterization()
-            # apply potential vorticity subgrid forcing term, if present
-
-        self._calc_diagnostics()
-        # do what has to be done with diagnostics
-
-        self._forward_timestep()
-        # apply tendencies to step the model forward
-        # (filter gets called here)
+        kernel.call(self._calc_diagnostics)
 
         # the basic steps are
         self._print_status()
@@ -465,6 +449,8 @@ class Model(ABC, PseudoSpectralKernel):
         self.ll = self.dl*np.append( np.arange(0.,self.nx/2),
             np.arange(-self.nx/2,0.) )
         self.kk = self.dk*np.arange(0.,self.nk)
+        self.ikQy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
+                          np.asarray(self.Qy)[:, np.newaxis])
 
         self.k, self.l = np.meshgrid(self.kk, self.ll)
         self.ik = 1j*self.k
