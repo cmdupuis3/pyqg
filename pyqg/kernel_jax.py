@@ -54,8 +54,8 @@ class KernelState(KernelFFT):
     `state.dqhdt` should calculate everything.
     """
     
-    def __init__(self, qh, Ubg, a, grid):
-        self.qh = qh
+    def __init__(self, q, Ubg, a, grid):
+        self.q = q
         self.Ubg = Ubg
         self.a = a
         self.grid = grid
@@ -73,9 +73,8 @@ class KernelState(KernelFFT):
         return jnp.multiply(self.ph, self.grid.ik, axis=2)
     
     @cached_property
-    def q(self):
-        qh_temp = self.qh
-        return self.ifft(qh_temp)  # this destroys qh_temp
+    def qh(self):
+        return self.fft(q)
     
     @cached_property
     def u(self):
@@ -168,11 +167,11 @@ class PSKernel(KernelFFT):
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         return jnp.zeros((self.nz, self.nl, self.nk), jnp.complex64) # complex128
     
-    def __init__(self, qh, Ubg, a, grid):
+    def __init__(self, q, Ubg, a, grid):
         self.Ubg = Ubg
         self.a = a
         self.grid = grid
-        self.state = KernelState(qh, Ubg, a, grid)
+        self.state = KernelState(q, Ubg, a, grid)
         
         # time stuff
         self.dt = 0.0
