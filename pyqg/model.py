@@ -217,7 +217,10 @@ class Model(ABC):
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
         if kernel_type == "jax":
-            self.kernel = PSKernel(self.qh, self.Ubg, self.a, grid)
+            grid = KernelGrid(self.nz, self.ny, self.nx, 
+                              self.kk, self.ik, self.ll, self.il,
+                              self.ikQy)
+            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid)
         elif kernel_type == "cython":
             self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                                     has_q_param=int(q_parameterization is not None),
