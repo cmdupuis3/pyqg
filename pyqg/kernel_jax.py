@@ -23,12 +23,13 @@ class KernelGrid:
     k2l2: int = field(init=False)
     
     def __post_init__():
-        self.nl = self.ny
         self.nk = int(self.nx/2 +1)
+        self.nl = self.ny
         
+        self.k2l2 = jnp.zeros((self.nl, self.nk))
         for j in range(self.nl):
             for i in range(self.nk):
-                self._k2l2[j,i] = self.kk[i]**2 + self.ll[j]**2
+                self.k2l2[j,i] = self.kk[i]**2 + self.ll[j]**2
 
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
