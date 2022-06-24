@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 
 @dataclass
@@ -27,28 +27,28 @@ class Grid:
     W: float = None
     
     
-    x: int = None
-    y: int = None
+    x: int = field(init=False)
+    y: int = field(init=False)
     
-    dk: float = None
-    dl: float = None
+    dk: float = field(init=False)
+    dl: float = field(init=False)
     
-    k:  int = None
-    l:  int = None
-    kk: int = None
-    ik: int = None
-    ll: int = None
-    il: int = None
+    k:  int = field(init=False)
+    l:  int = field(init=False)
+    kk: int = field(init=False)
+    ik: int = field(init=False)
+    ll: int = field(init=False)
+    il: int = field(init=False)
     
-    M:  int = None
+    M:  int = field(init=False)
     
-    wv2:  float = None
-    wv:   float = None
-    wv2i: float = None
+    wv2:  float = field(init=False)
+    wv:   float = field(init=False)
+    wv2i: float = field(init=False)
     
-    nk:   int = None
-    nl:   int = None
-    k2l2: int = None
+    nk:   int = field(init=False)
+    nl:   int = field(init=False)
+    k2l2: int = field(init=False)
     
     @cached_property
     def ikQy(Qy):
