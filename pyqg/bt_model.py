@@ -51,10 +51,10 @@ class BTModel(model.Model):
         else:
             self.kd2 = 0.
 
-        super().__init__(**kwargs)
-
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
+
+        super().__init__(**kwargs)
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""

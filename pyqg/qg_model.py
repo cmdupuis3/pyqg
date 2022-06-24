@@ -97,13 +97,13 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
 
-        super().__init__(nz=2, **kwargs)
-
         # initial conditions: (PV anomalies)
         self.set_q1q2(
             1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
                 np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
                 np.zeros_like(self.x) )
+
+        super().__init__(nz=2, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

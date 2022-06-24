@@ -123,13 +123,13 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
-        super().__init__(nz=nz, f=f, **kwargs)
-
         self.vertical_modes()
 
         self.set_q(1e-7*np.vstack([
             np.random.randn(self.nx,self.ny)[np.newaxis,]
             for _ in range(nz)]))
+
+        super().__init__(nz=nz, f=f, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
