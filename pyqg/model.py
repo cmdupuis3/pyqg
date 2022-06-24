@@ -220,7 +220,8 @@ class Model(ABC):
             grid = KernelGrid(self.nz, self.ny, self.nx, 
                               self.kk, self.ik, self.ll, self.il,
                               self.ikQy)
-            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid)
+            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
+                                  uv_parameterization, q_parameterization)
         elif kernel_type == "cython":
             self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                                     has_q_param=int(q_parameterization is not None),
