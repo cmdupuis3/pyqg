@@ -23,7 +23,7 @@ class BTModel(model.Model):
 
     """
 
-    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(self, grid, beta=0.,  rd=0., H=1., U=0., **kwargs):
         """
         Parameters
         ----------
@@ -43,18 +43,18 @@ class BTModel(model.Model):
         self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
 
-        self.nz = 1
-
         # deformation wavenumber
         if rd:
             self.kd2 = rd**-2
         else:
             self.kd2 = 0.
 
-        # initial conditions: (PV anomalies)
-        self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
+        self.grid = grid
 
-        super().__init__(**kwargs)
+        # initial conditions: (PV anomalies)
+        self.set_q(1e-3*np.random.rand(1,self.grid.ny,self.grid.nx))
+
+        super().__init__(self.grid, **kwargs)
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""

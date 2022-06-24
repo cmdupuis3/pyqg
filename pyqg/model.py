@@ -102,6 +102,7 @@ class Model(ABC):
 
     def __init__(
         self,
+        grid,
         kernel_type="jax",
         # timestepping parameters
         dt=7200.,                   # numerical timestep
@@ -198,9 +199,6 @@ class Model(ABC):
         # attributes are python
         self.kernel = None
         if kernel_type == "jax":
-            grid = KernelGrid(self.nz, self.ny, self.nx,
-                              self.kk, self.ik, self.ll, self.il,
-                              self.ikQy)
             self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
                                   uv_parameterization, q_parameterization)
         elif kernel_type == "cython":
@@ -209,9 +207,6 @@ class Model(ABC):
                                     has_uv_param=int(uv_parameterization is not None))
         else:
             raise ValueError(f"unknown kernel type {kernel_type}; valid options are \"jax\" or \"cython\".")
-
-        self.L = L
-        self.W = W
 
         # timestepping
         self.dt = dt

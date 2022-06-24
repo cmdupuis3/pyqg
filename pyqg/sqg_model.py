@@ -8,6 +8,7 @@ class SQGModel(model.Model):
 
     def __init__(
         self,
+        grid,
         beta=0.,                    # gradient of coriolis parameter
         Nb = 1.,                    # Buoyancy frequency
         f_0 = 1.,                   # coriolis parameter
@@ -37,12 +38,12 @@ class SQGModel(model.Model):
         self.U = U
         #self.filterfac = filterfac
 
-        self.nz = 1
+        self.grid = grid
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
 
-        super().__init__(**kwargs)
+        super().__init__(self.grid, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

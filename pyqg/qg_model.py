@@ -59,6 +59,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
 
     def __init__(
         self,
+        grid,
         beta=1.5e-11,               # gradient of coriolis parameter
         #rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
@@ -96,14 +97,17 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U1 = U1
         self.U2 = U2
         #self.filterfac = filterfac
+        
+        grid.nz = 2
+        self.grid = grid
 
         # initial conditions: (PV anomalies)
         self.set_q1q2(
-            1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
-                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
-                np.zeros_like(self.x) )
+            1e-7*np.random.rand(self.grid.ny,self.grid.nx) + 1e-6*(
+                np.ones((self.grid.ny,1)) * np.random.rand(1,self.grid.nx) ),
+                np.zeros_like(self.grid.x) )
 
-        super().__init__(nz=2, **kwargs)
+        super().__init__(self.grid, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

@@ -125,11 +125,14 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         self.vertical_modes()
 
+        grid.nz = nz
+        self.grid = grid
+        
         self.set_q(1e-7*np.vstack([
-            np.random.randn(self.nx,self.ny)[np.newaxis,]
+            np.random.randn(self.grid.nx,self.grid.ny)[np.newaxis,]
             for _ in range(nz)]))
 
-        super().__init__(nz=nz, f=f, **kwargs)
+        super().__init__(self.grid, f=f, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
