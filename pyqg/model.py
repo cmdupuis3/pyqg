@@ -103,12 +103,6 @@ class Model(ABC):
     def __init__(
         self,
         kernel_type="jax",
-        # grid size parameters
-        nz=1,
-        nx=64,                     # grid resolution
-        ny=None,
-        L=1e6,                     # domain size is L [m]
-        W=None,
         # timestepping parameters
         dt=7200.,                   # numerical timestep
         twrite=1000.,               # interval for cfl and ke writeout (in timesteps)
@@ -138,20 +132,10 @@ class Model(ABC):
         logfile = None,                # logfile; None prints to screen
         ):
         """
-        .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
-                  these parameters to be different.
         .. note:: All time intervals will be rounded to nearest `dt` interval.
 
         Parameters
         ----------
-        nx : int
-            Number of grid points in the x direction.
-        ny : int
-            Number of grid points in the y direction (default: nx).
-        L : number
-            Domain length in x direction. Units: meters.
-        W :
-            Domain width in y direction. Units: meters (default: L).
         rek : number
             linear drag in lower layer. Units: seconds :sup:`-1`.
         filterfac : number
@@ -196,10 +180,6 @@ class Model(ABC):
             be inferred.
         """
 
-        if ny is None:
-            ny = nx
-        if W is None:
-            W = L
 
         # if an explicit parameterization object was passed without a given
         # type, infer it from its attributes
@@ -216,8 +196,9 @@ class Model(ABC):
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
+        self.kernel = None
         if kernel_type == "jax":
-            grid = KernelGrid(self.nz, self.ny, self.nx, 
+            grid = KernelGrid(self.nz, self.ny, self.nx,
                               self.kk, self.ik, self.ll, self.il,
                               self.ikQy)
             self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
@@ -261,7 +242,6 @@ class Model(ABC):
         # Really we just need to initialize the grid here. It's not necessary
         # to have all these silly methods. Maybe we need "hooks" instead.
         self._initialize_logger()
-        self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
@@ -269,10 +249,6 @@ class Model(ABC):
         self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
 
-    @property
-    @abstractmethod
-    def Qy(self):
-        pass
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
@@ -433,47 +409,6 @@ class Model(ABC):
         #self.tc=0       # timestep number
         self.taveints = np.ceil(self.taveint/self.dt)
 
-    ### initialization routines, only called once at the beginning ###
-    # TODO: clean up and simplify this whole routine
-    def _initialize_grid(self):
-        """Set up spatial and spectral grids and related constants"""
-        self.x,self.y = np.meshgrid(
-            np.arange(0.5,self.nx,1.)/self.nx*self.L,
-            np.arange(0.5,self.ny,1.)/self.ny*self.W )
-
-        # Notice: at xi=1 U=beta*rd^2 = c for xi>1 => U>c
-        # wavenumber one (equals to dkx/dky)
-        self.dk = 2.*pi/self.L
-        self.dl = 2.*pi/self.W
-
-        # wavenumber grids
-        # set in kernel
-        #self.nl = self.ny
-        #self.nk = int(self.nx/2+1)
-        self.ll = self.dl*np.append( np.arange(0.,self.nx/2),
-            np.arange(-self.nx/2,0.) )
-        self.kk = self.dk*np.arange(0.,self.nk)
-        self.ikQy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
-                          np.asarray(self.Qy)[:, np.newaxis])
-
-        self.k, self.l = np.meshgrid(self.kk, self.ll)
-        self.ik = 1j*self.k
-        self.il = 1j*self.l
-        # physical grid spacing
-        self.dx = self.L / self.nx
-        self.dy = self.W / self.ny
-
-        # constant for spectral normalizations
-        self.M = self.nx*self.ny
-
-        # isotropic wavenumber^2 grid
-        # the inversion is not defined at kappa = 0
-        self.wv2 = self.k**2 + self.l**2
-        self.wv = np.sqrt( self.wv2 )
-
-        iwv2 = self.wv2 != 0.
-        self.wv2i = np.zeros_like(self.wv2)
-        self.wv2i[iwv2] = self.wv2[iwv2]**-1
 
     def _initialize_background(self):
         raise NotImplementedError(

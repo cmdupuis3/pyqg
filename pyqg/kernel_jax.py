@@ -1,35 +1,5 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from dataclasses import dataclass
-
-@dataclass
-class KernelGrid:
-    """
-    Grid information needed by Kernel classes.
-    """
-    nz: int
-    ny: int
-    nx: int
-    
-    kk: int
-    ik: int
-    ll: int
-    il: int
-    
-    ikQy: int
-    
-    nk:   int = None
-    nl:   int = None
-    k2l2: int = None
-    
-    def __post_init__():
-        self.nk = int(self.nx/2 +1)
-        self.nl = self.ny
-        
-        self.k2l2 = jnp.zeros((self.nl, self.nk))
-        for j in range(self.nl):
-            for i in range(self.nk):
-                self.k2l2[j,i] = self.kk[i]**2 + self.ll[j]**2
 
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
