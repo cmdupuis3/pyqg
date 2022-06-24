@@ -18,9 +18,9 @@ class KernelGrid:
     
     ikQy: int
     
-    nk:   int = field(init=False)
-    nl:   int = field(init=False)
-    k2l2: int = field(init=False)
+    nk:   int = None
+    nl:   int = None
+    k2l2: int = None
     
     def __post_init__():
         self.nk = int(self.nx/2 +1)
@@ -99,7 +99,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def _du_dv(self):
-        return self.uv_parameterization()
+        return self.uv_par()
     
     @cached_property
     def du(self):
@@ -119,7 +119,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def dq(self):
-        return self.q_parameterization()
+        return self.q_par()
     
     @cached_property
     def dqh(self):
