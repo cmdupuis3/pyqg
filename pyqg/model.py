@@ -7,6 +7,7 @@ import inspect
 from abc import ABC, abstractmethod
 
 from .errors import DiagnosticNotFilledError
+# from .grid import Grid
 from .kernel_jax import PSKernel
 from .parameterizations import Parameterization
 try:
@@ -180,7 +181,8 @@ class Model(ABC):
             velocity or potential vorticity parameterization, whose type will
             be inferred.
         """
-
+        
+        self.grid = grid
 
         # if an explicit parameterization object was passed without a given
         # type, infer it from its attributes
@@ -202,6 +204,7 @@ class Model(ABC):
             self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
                                   uv_parameterization, q_parameterization)
         elif kernel_type == "cython":
+            # TODO: apply new kernel interfaces to Cython kernel
             self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                                     has_q_param=int(q_parameterization is not None),
                                     has_uv_param=int(uv_parameterization is not None))

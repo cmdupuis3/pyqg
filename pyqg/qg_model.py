@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 from . import qg_diagnostics
+from .grid import Grid
 
 try:
     import mkl
@@ -59,7 +60,6 @@ class QGModel(qg_diagnostics.QGDiagnostics):
 
     def __init__(
         self,
-        grid,
         beta=1.5e-11,               # gradient of coriolis parameter
         #rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
@@ -98,8 +98,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
         
-        grid.nz = 2
-        self.grid = grid
+        self.grid = Grid(nz=2)
 
         # initial conditions: (PV anomalies)
         self.set_q1q2(
@@ -128,6 +127,9 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.Qy1 = self.beta + self.F1*(self.U1 - self.U2)
         self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
         self.Qy = np.array([self.Qy1, self.Qy2])
+        
+        self.grid.set__ikQy(self.Qy)
+        
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy1 = self.Qy1 * 1j * self.k
         self.ikQy2 = self.Qy2 * 1j * self.k

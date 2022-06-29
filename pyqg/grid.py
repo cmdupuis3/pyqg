@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 
+
 @dataclass
 class Grid:
     """
@@ -19,12 +20,12 @@ class Grid:
             Domain width in y direction. Units: meters (default: L).
     
     """
-    nz: int = 1
-    ny: int = None # grid resolution
-    nx: int = 64
+    nz: int
+    ny: int # grid resolution
+    nx: int
     
-    L: float = 1e6 # domain size is L [m]
-    W: float = None
+    L: float # domain size is L [m]
+    W: float
     
     
     x: int = field(init=False)
@@ -50,10 +51,10 @@ class Grid:
     nl:   int = field(init=False)
     k2l2: int = field(init=False)
     
-    @cached_property
-    def ikQy(Qy):
-        return (1j * (np.asarray(self.kk)[np.newaxis, :] *
-                      np.asarray(self.Qy)[:, np.newaxis]))
+    # TODO: double check this; may vary by _initialize_background implementation
+    def set__ikQy(Qy): 
+        self._ikQy = (1j * (np.asarray(self.kk)[np.newaxis, :] *
+                            np.asarray(Qy)[:, np.newaxis]))
     
     def __post_init__():
         

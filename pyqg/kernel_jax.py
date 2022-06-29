@@ -101,7 +101,7 @@ class KernelState(KernelFFT):
         
         adv = - ( jnp.multiply(self.uqh, self.grid.ik, axis=2) +
                   jnp.multiply(self.vqh, self.grid.il, axis=1) +
-                  jnp.multiply(self.ph,  self.grid.ikQy, axes = [0,2]) # check axes!
+                  jnp.multiply(self.ph,  self.grid._ikQy, axes = [0,2]) # check axes!
                 )
         uv_par = lambda x: x + ( jnp.multiply(self.dvh, self.grid.ik, axis=2) -
                                  jnp.multiply(self.duh, self.grid.il, axis=1) )

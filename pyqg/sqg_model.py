@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 from . import model
+from .grid import Grid
 
 
 class SQGModel(model.Model):
@@ -8,7 +9,6 @@ class SQGModel(model.Model):
 
     def __init__(
         self,
-        grid,
         beta=0.,                    # gradient of coriolis parameter
         Nb = 1.,                    # Buoyancy frequency
         f_0 = 1.,                   # coriolis parameter
@@ -38,7 +38,7 @@ class SQGModel(model.Model):
         self.U = U
         #self.filterfac = filterfac
 
-        self.grid = grid
+        self.grid = Grid()
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
@@ -52,6 +52,8 @@ class SQGModel(model.Model):
 
         # the meridional PV gradients in each layer
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        
+        self.grid.set__ikQy(self.Qy)
 
         # background vel.
         self.set_U(self.U)

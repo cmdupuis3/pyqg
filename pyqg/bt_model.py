@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 from . import model
+from .grid import Grid
 
 
 class BTModel(model.Model):
@@ -23,7 +24,7 @@ class BTModel(model.Model):
 
     """
 
-    def __init__(self, grid, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
         """
         Parameters
         ----------
@@ -49,7 +50,7 @@ class BTModel(model.Model):
         else:
             self.kd2 = 0.
 
-        self.grid = grid
+        self.grid = Grid()
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.grid.ny,self.grid.nx))
@@ -61,6 +62,8 @@ class BTModel(model.Model):
 
         # the meridional PV gradients in each layer
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        
+        self.grid.set__ikQy(self.Qy)
 
         # background vel.
         self.set_U(self.U)

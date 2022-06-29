@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 from . import qg_diagnostics
+from .grid import Grid
 
 try:
     import mkl
@@ -124,15 +125,15 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.rhoi = np.array(rho)
 
         self.vertical_modes()
-
-        grid.nz = nz
-        self.grid = grid
+        
+        self.grid = Grid(nz=nz)
         
         self.set_q(1e-7*np.vstack([
             np.random.randn(self.grid.nx,self.grid.ny)[np.newaxis,]
             for _ in range(nz)]))
+        
+        super().__init__(grid=self.grid, f=f, **kwargs)
 
-        super().__init__(self.grid, f=f, **kwargs)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
@@ -204,8 +205,9 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         # the meridional PV gradients in each layer
         self.Qy = self.beta - np.dot(self.S,self.Ubg) # m^-1 s^-1 
-        self.Qx = np.dot(self.S,self.Vbg)             # m^-1 s^-1 
-
+        self.Qx = np.dot(self.S,self.Vbg)             # m^-1 s^-1
+        
+        self.grid.set__ikQy(self.Qy)
 
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k # m^-2 s^-1 
