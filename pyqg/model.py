@@ -197,19 +197,7 @@ class Model(ABC):
             else:
                 raise ValueError(f"unknown parameterization type {ptype}")
 
-        # TODO: be more clear about what attributes are cython and what
-        # attributes are python
         self.kernel = None
-        if kernel_type == "jax":
-            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
-                                  uv_parameterization, q_parameterization)
-        elif kernel_type == "cython":
-            # TODO: apply new kernel interfaces to Cython kernel
-            self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
-                                    has_q_param=int(q_parameterization is not None),
-                                    has_uv_param=int(uv_parameterization is not None))
-        else:
-            raise ValueError(f"unknown kernel type {kernel_type}; valid options are \"jax\" or \"cython\".")
 
         # timestepping
         self.dt = dt
@@ -241,6 +229,7 @@ class Model(ABC):
         # to have all these silly methods. Maybe we need "hooks" instead.
         self._initialize_logger()
         self._initialize_background()
+        self._initialize_kernel()
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_time()
@@ -411,6 +400,20 @@ class Model(ABC):
     def _initialize_background(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
+        
+    def _initialize_kernel(self):
+        # TODO: be more clear about what attributes are cython and what
+        # attributes are python
+        if kernel_type == "jax":
+            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
+                                  uv_parameterization, q_parameterization)
+        elif kernel_type == "cython":
+            # TODO: apply new kernel interfaces to Cython kernel
+            self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
+                                    has_q_param=int(q_parameterization is not None),
+                                    has_uv_param=int(uv_parameterization is not None))
+        else:
+            raise ValueError(f"unknown kernel type {kernel_type}; valid options are \"jax\" or \"cython\".")
 
     def _initialize_inversion_matrix(self):
         raise NotImplementedError(
