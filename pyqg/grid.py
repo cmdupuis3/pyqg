@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from functools import cached_property
+import numpy as np
 
 
 @dataclass
@@ -52,7 +53,7 @@ class Grid:
     k2l2: int = field(init=False)
     
     # TODO: double check this; may vary by _initialize_background implementation
-    def set__ikQy(Qy): 
+    def set__ikQy(self, Qy): 
         self._ikQy = (1j * (np.asarray(self.kk)[np.newaxis, :] *
                             np.asarray(Qy)[:, np.newaxis]))
     
@@ -69,13 +70,12 @@ class Grid:
 
         # Notice: at xi=1 U=beta*rd^2 = c for xi>1 => U>c
         # wavenumber one (equals to dkx/dky)
-        self.dk = 2.*pi/self.L
-        self.dl = 2.*pi/self.W
+        self.dk = 2.*np.pi/self.L
+        self.dl = 2.*np.pi/self.W
 
         # wavenumber grids
-        # set in kernel
-        #self.nl = self.ny
-        #self.nk = int(self.nx/2+1)
+        self.nl = self.ny
+        self.nk = int(self.nx/2+1)
         self.ll = self.dl*np.append( np.arange(0.,self.nx/2),
             np.arange(-self.nx/2,0.) )
         self.kk = self.dk*np.arange(0.,self.nk)
@@ -101,9 +101,6 @@ class Grid:
         
         
         # Kernel grid calculations
-        self.nk = int(self.nx/2 +1)
-        self.nl = self.ny
-        
         self.k2l2 = np.zeros((self.nl, self.nk))
         for j in range(self.nl):
             for i in range(self.nk):
