@@ -98,7 +98,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def dqhdt(self):
-        k = self.nz-1
+        k = self.grid.nz-1
         
         adv = - ( jnp.multiply(self.uqh, self.grid.ik, axis=2) +
                   jnp.multiply(self.vqh, self.grid.il, axis=1) +
@@ -137,11 +137,11 @@ class PSKernel(KernelFFT):
     
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
-        return jnp.zeros((self.nz, self.ny, self.nx), jnp.float32) # float64
+        return jnp.zeros((self.grid.nz, self.grid.ny, self.grid.nx), jnp.float32) # float64
 
     def _empty_com(self):
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
-        return jnp.zeros((self.nz, self.nl, self.nk), jnp.complex64) # complex128
+        return jnp.zeros((self.grid.nz, self.grid.nl, self.grid.nk), jnp.complex64) # complex128
     
     def __init__(self, q, Ubg, a, grid, rek = 0.0, uv_par = None, q_par = None):
         self.Ubg = Ubg
