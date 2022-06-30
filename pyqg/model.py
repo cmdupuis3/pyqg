@@ -198,6 +198,7 @@ class Model(ABC):
                 raise ValueError(f"unknown parameterization type {ptype}")
 
         self.kernel = None
+        self.kernel_type = kernel_type
 
         # timestepping
         self.dt = dt
@@ -404,16 +405,16 @@ class Model(ABC):
     def _initialize_kernel(self):
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
-        if kernel_type == "jax":
+        if self.kernel_type == "jax":
             self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
                                   uv_parameterization, q_parameterization)
-        elif kernel_type == "cython":
+        elif self.kernel_type == "cython":
             # TODO: apply new kernel interfaces to Cython kernel
             self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                                     has_q_param=int(q_parameterization is not None),
                                     has_uv_param=int(uv_parameterization is not None))
         else:
-            raise ValueError(f"unknown kernel type {kernel_type}; valid options are \"jax\" or \"cython\".")
+            raise ValueError(f"unknown kernel type {self.kernel_type}; valid options are \"jax\" or \"cython\".")
 
     def _initialize_inversion_matrix(self):
         raise NotImplementedError(
