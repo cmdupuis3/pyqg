@@ -237,6 +237,9 @@ class Model(ABC):
         self._initialize_time()
         self._initialize_diagnostics(diagnostics_list)
 
+    @property
+    def t(self):
+        return self.kernel.t
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.

@@ -50,7 +50,7 @@ class KernelState(KernelFFT):
     
     @cached_property
     def qh(self):
-        return self.fft(q)
+        return self.fft(self.q)
     
     @cached_property
     def u(self):
@@ -67,6 +67,14 @@ class KernelState(KernelFFT):
     @cached_property
     def vq(self):
         return self.v * self.q
+    
+    @cached_property
+    def uqh(self):
+        return self.fft(self.uq)
+    
+    @cached_property
+    def vqh(self):
+        return self.fft(self.vq)
     
     @cached_property
     def _du_dv(self):
