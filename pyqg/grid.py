@@ -56,7 +56,7 @@ class Grid:
         self._ikQy = (1j * (np.asarray(self.kk)[np.newaxis, :] *
                             np.asarray(Qy)[:, np.newaxis]))
     
-    def __post_init__():
+    def __post_init__(self):
         
         if self.ny is None:
             self.ny = self.nx
