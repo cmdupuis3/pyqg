@@ -251,7 +251,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
     def _calc_derived_fields(self):
 
         self.p = self.ifft(self.ph) # m^2 s^-1
-        self.xi =self.ifft(-self.wv2*self.ph) # s^-1
+        self.xi =self.ifft(-self.grid.wv2*self.ph) # s^-1
         self.Jpxi = self._advect(self.xi, self.u, self.v) # s^-2
         self.Jq = self._advect(self.q, self.u, self.v) # s^-2
 
@@ -270,7 +270,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('KEspec_modal',
                 description='modal kinetic energy spectra',
                 function= (lambda self:
-                    self.wv2*(np.abs(self.phn)**2)/self.M**2 ),
+                    self.grid.wv2*(np.abs(self.phn)**2)/self.grid.M**2 ),
                 units='m^2 s^-2',
                 dims=('lev','l','k')
         )
@@ -278,7 +278,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('PEspec_modal',
                 description='modal potential energy spectra',
                 function= (lambda self:
-                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
+                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.grid.M**2),
                 units='m^2 s^-2',
                 dims=('lev_mid','l','k')
         )
@@ -287,7 +287,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                 description='available potential energy spectrum',
                 function= (lambda self:
                            (self.f2gpi*
-                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.M**2),
+                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.grid.M**2),
                 units='m^2 s^-2',
                 dims=('l','k')
         )
@@ -295,7 +295,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('KEflux_div',
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
+                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.grid.M**2),
                 units='m^2 s^-3',
                 dims=('l','k'),
                 sums_with=['paramspec_KEflux'],
@@ -304,7 +304,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('APEflux_div',
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
+                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.grid.M**2),
                 units='m^2 s^-3',
                 dims=('l','k'),
                 sums_with=['paramspec_APEflux'],
