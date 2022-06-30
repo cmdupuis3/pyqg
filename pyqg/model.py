@@ -368,8 +368,8 @@ class Model(ABC):
         # sorting things this way proved way
         #  more faster than using numpy's argsort() !
         imax = evals.imag.argmax(axis=0)
-        for i in range(self.nl):
-            for j in range(self.nk):
+        for i in range(self.grid.nl):
+            for j in range(self.grid.nk):
                 omega[i,j] = evals[imax[i,j],i,j]
                 phi[:,i,j] = evecs[imax[i,j],:,i,j]
 
@@ -386,7 +386,7 @@ class Model(ABC):
 
     def _step_forward(self):
 
-        kernel.call(self._calc_diagnostics)
+        self.kernel.call(self._calc_diagnostics)
 
         # the basic steps are
         self._print_status()
@@ -428,7 +428,7 @@ class Model(ABC):
         """Set up frictional filter."""
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
-        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
+        wvx=np.sqrt((self.grid.k*self.grid.dx)**2.+(self.grid.l*self.grid.dy)**2.)
         filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         filtr[wvx<=cphi] = 1.
         self.filtr = filtr

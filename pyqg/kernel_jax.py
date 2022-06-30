@@ -212,8 +212,8 @@ class PSKernel(KernelFFT):
         
         return
     
-    def call(diagnostics):
-        _ = self.dqhdt
+    def call(self, diagnostics):
+        _ = self.state.dqhdt
         diagnostics()
         self._forward_timestep()
         return

@@ -41,6 +41,9 @@ class Grid:
     ll: int = field(init=False)
     il: int = field(init=False)
     
+    dx: float = field(init=False)
+    dy: float = field(init=False)
+    
     M:  int = field(init=False)
     
     wv2:  float = field(init=False)
