@@ -170,10 +170,6 @@ class PSKernel(KernelFFT):
     def qh(self):
         return self.state.qh
     
-    @property
-    def dqhdt(self):
-        return self.state.dqhdt
-    
     def _forward_timestep(self):
         """Step forward based on tendencies"""
 
@@ -208,6 +204,7 @@ class PSKernel(KernelFFT):
 
         # do FFT of new qh
         self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
+        self.dqhdt = self.state.dqhdt
         self.q = self.state.q # don't think we need this, but idk
 
         self.tc += 1
