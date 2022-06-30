@@ -127,8 +127,6 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
-
-        self.vertical_modes()
         
         self.grid = Grid(nz, ny, nx, L, W)
         
@@ -137,7 +135,9 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
             for _ in range(nz)]))
         
         super().__init__(grid=self.grid, f=f, **kwargs)
-
+        
+        self.vertical_modes()
+    
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
