@@ -80,14 +80,14 @@ class BTModel(model.Model):
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikQy = self.Qy * 1j * self.grid.k
 
         self.ilQx = 0.
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
         # The bt model is diagonal. The inversion is simply qh = -kappa**2 ph
-        self.a = -(self.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
+        self.a = -(self.grid.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass

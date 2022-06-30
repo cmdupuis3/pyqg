@@ -64,14 +64,14 @@ class SQGModel(model.Model):
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikQy = self.Qy * 1j * self.grid.k
 
         self.ilQx = 0.
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
         # The sqg inversion is ph = f / (kappa * N) qh (see documentation) 
-        self.a = np.asarray(self.f_0/self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
+        self.a = np.asarray(self.f_0/self.Nb*np.sqrt(self.grid.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass

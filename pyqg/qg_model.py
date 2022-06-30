@@ -136,8 +136,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.grid.set__ikQy(self.Qy)
         
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy1 = self.Qy1 * 1j * self.k
-        self.ikQy2 = self.Qy2 * 1j * self.k
+        self.ikQy1 = self.Qy1 * 1j * self.grid.k
+        self.ikQy2 = self.Qy2 * 1j * self.grid.k
 
         # vector version
         self.ikQy = np.vstack([self.ikQy1[np.newaxis,...],
@@ -160,14 +160,14 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         # ph[0] = a[0,0] * self.qh[0] + a[0,1] * self.qh[1]
         # ph[1] = a[1,0] * self.qh[0] + a[1,1] * self.qh[1]
         
-        a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
+        a = np.ma.zeros((self.grid.nz, self.grid.nz, self.grid.nl, self.grid.nk), np.dtype('float64'))
         # inverse determinant
         det_inv =  np.ma.masked_equal(
-                self.wv2 * (self.wv2 + self.F1 + self.F2), 0.)**-1
-        a[0,0] = -(self.wv2 + self.F2)*det_inv
+                self.grid.wv2 * (self.grid.wv2 + self.F1 + self.F2), 0.)**-1
+        a[0,0] = -(self.grid.wv2 + self.F2)*det_inv
         a[0,1] = -self.F1*det_inv
         a[1,0] = -self.F2*det_inv
-        a[1,1] = -(self.wv2 + self.F1)*det_inv
+        a[1,1] = -(self.grid.wv2 + self.F1)*det_inv
 
         self.a = np.ma.masked_invalid(a).filled(0.)
 
@@ -223,7 +223,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
 
     def _calc_derived_fields(self):
         self.p = self.ifft(self.ph)
-        self.xi =self.ifft(-self.wv2*self.ph)
+        self.xi =self.ifft(-self.grid.wv2*self.ph)
         self.Jptpc = -self._advect(
                     (self.p[0] - self.p[1]),
                     (self.del1*self.u[0] + self.del2*self.u[1]),
@@ -262,10 +262,10 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('APEgen',
             description='total available potential energy generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real((1j*self.k*
+                       np.real((1j*self.grid.k*
                             (self.del1*self.ph[0] + self.del2*self.ph[1]) *
                             np.conj(self.ph[0] - self.ph[1])).sum()
-                              +(1j*self.k[:,1:-2]*
+                              +(1j*self.grid.k[:,1:-2]*
                             (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
                             (self.M**2) ),

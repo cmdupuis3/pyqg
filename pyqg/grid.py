@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 import numpy as np
 
-
 @dataclass
 class Grid:
     """

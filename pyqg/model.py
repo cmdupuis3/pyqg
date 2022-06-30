@@ -406,8 +406,8 @@ class Model(ABC):
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
         if self.kernel_type == "jax":
-            self.kernel = PSKernel(self.q, self.Ubg, self.a, grid, rek,
-                                  uv_parameterization, q_parameterization)
+            self.kernel = PSKernel(self.q, self.Ubg, self.a, self.grid, self.rek,
+                                   self.uv_parameterization, self.q_parameterization)
         elif self.kernel_type == "cython":
             # TODO: apply new kernel interfaces to Cython kernel
             self.kernel = PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,

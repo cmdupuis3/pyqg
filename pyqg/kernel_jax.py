@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
+import jax.numpy as jnp
 
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
