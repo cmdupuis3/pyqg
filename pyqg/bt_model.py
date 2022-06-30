@@ -24,7 +24,18 @@ class BTModel(model.Model):
 
     """
 
-    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(
+        self,
+        beta=0.,
+        nz = 1,
+        nx = 64,                     # grid resolution
+        ny = None,
+        L  = 1e6,                     # domain size is L [m]
+        W  = None,
+        rd=0.,
+        H=1.,
+        U=0.,
+        **kwargs):
         """
         Parameters
         ----------
@@ -50,7 +61,7 @@ class BTModel(model.Model):
         else:
             self.kd2 = 0.
 
-        self.grid = Grid()
+        self.grid = Grid(nz, ny, nx, L, W)
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.grid.ny,self.grid.nx))

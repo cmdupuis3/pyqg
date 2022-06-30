@@ -74,6 +74,10 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self,
         beta = 1.5e-11,             # gradient of coriolis parameter
         nz = 3,                     # number of layers
+        nx = 64,                     # grid resolution
+        ny = None,
+        L  = 1e6,                     # domain size is L [m]
+        W  = None,
         rd = 15000.0,               # deformation radius
         f = 0.0001236812857687059,  # coriolis parameter [s^-1]
         H = None,                   # layer thickness
@@ -126,7 +130,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         self.vertical_modes()
         
-        self.grid = Grid(nz=nz)
+        self.grid = Grid(nz, ny, nx, L, W)
         
         self.set_q(1e-7*np.vstack([
             np.random.randn(self.grid.nx,self.grid.ny)[np.newaxis,]

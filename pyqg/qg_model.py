@@ -61,6 +61,11 @@ class QGModel(qg_diagnostics.QGDiagnostics):
     def __init__(
         self,
         beta=1.5e-11,               # gradient of coriolis parameter
+        nz = 2,                     # number of layers
+        nx = 64,                    # grid resolution
+        ny = None,
+        L  = 1e6,                   # domain size is L [m]
+        W  = None,
         #rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
         delta=0.25,                 # layer thickness ratio (H1/H2)
@@ -98,7 +103,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
         
-        self.grid = Grid(nz=2)
+        self.grid = Grid(nz, ny, nx, L, W)
 
         # initial conditions: (PV anomalies)
         self.set_q1q2(

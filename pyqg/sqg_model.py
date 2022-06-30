@@ -10,6 +10,11 @@ class SQGModel(model.Model):
     def __init__(
         self,
         beta=0.,                    # gradient of coriolis parameter
+        nz = 1,                     # number of layers
+        nx = 64,                    # grid resolution
+        ny = None,
+        L  = 1e6,                   # domain size is L [m]
+        W  = None,
         Nb = 1.,                    # Buoyancy frequency
         f_0 = 1.,                   # coriolis parameter
         H = 1.,                     # depth of layer
@@ -38,10 +43,10 @@ class SQGModel(model.Model):
         self.U = U
         #self.filterfac = filterfac
 
-        self.grid = Grid()
+        self.grid = Grid(nz, ny, nx, L, W)
 
         # initial conditions: (PV anomalies)
-        self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
+        self.set_q(1e-3*np.random.rand(1,self.grid.ny,self.grid.nx))
 
         super().__init__(self.grid, **kwargs)
 

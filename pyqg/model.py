@@ -344,7 +344,7 @@ class Model(ABC):
         omega = np.zeros_like(self.wv)+0.j
         phi = np.zeros_like(self.qh)
 
-        I = np.eye(self.nz)
+        I = np.eye(self.grid.nz)
 
         L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
 
@@ -476,8 +476,8 @@ class Model(ABC):
         # it does an extra unnecessary fft
         is_2d = (uq.ndim==2)
         if is_2d:
-            uq = np.tile(uq[np.newaxis,:,:], (self.nz,1,1))
-            vq = np.tile(vq[np.newaxis,:,:], (self.nz,1,1))
+            uq = np.tile(uq[np.newaxis,:,:], (self.grid.nz,1,1))
+            vq = np.tile(vq[np.newaxis,:,:], (self.grid.nz,1,1))
         tend = self.ik*self.fft(uq) + self.il*self.fft(vq)
         if is_2d:
             return tend[0]
