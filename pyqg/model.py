@@ -230,11 +230,11 @@ class Model(ABC):
         # to have all these silly methods. Maybe we need "hooks" instead.
         self._initialize_logger()
         self._initialize_background()
+        self._initialize_inversion_matrix()
         self._initialize_kernel()
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_time()
-        self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
 
 
