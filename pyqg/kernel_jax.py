@@ -15,7 +15,7 @@ class KernelFFT:
     def ifft(self, x):
         return jnp.fft.irfftn(x, axes=(-2,-1))
 
-    
+
 class KernelState(KernelFFT):
     """
     A class to track an instantaneous state of the kernel. 
@@ -120,6 +120,8 @@ class KernelState(KernelFFT):
         def compose(f1, f2):
             return lambda x: f1(f2(x))
         
+        # This is written this way so jax will hopefully see a more inlined version 
+        # of what we're doing, potentially avoiding intermediate sums
         if self.rek:
             if uv_parameterization is not None:
                 if q_parameterization is not None:
@@ -168,8 +170,6 @@ class PSKernel(KernelFFT):
         self.dqhdt_p  = self._empty_com()
         self.dqhdt_pp = self._empty_com()
         
-    # Only these should be properties of this class; other state
-    # variables should come from calls to kernel.state
     @property
     def q(self):
         return self.state.q
@@ -211,7 +211,7 @@ class PSKernel(KernelFFT):
         self.dqhdt_p = self.dqhdt
 
         # do FFT of new qh
-        self.state = KernelState(self.qh, self.Ubg, self.a, self.grid)
+        self.state = KernelState(self.q, self.Ubg, self.a, self.grid)
         self.dqhdt = self.state.dqhdt
         self.q = self.state.q # don't think we need this, but idk
 
