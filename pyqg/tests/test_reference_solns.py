@@ -24,7 +24,6 @@ class ReferenceSolutionsTester(unittest.TestCase):
             tmax=3*year,
             tavestart=1*year,
             taveint=12800.,
-            useAB2=True,
             diagnostics_list='all'
             )
 
