@@ -237,9 +237,91 @@ class Model(ABC):
         self._initialize_time()
         self._initialize_diagnostics(diagnostics_list)
 
+    # @property
+    # def dt(self):
+    #     return self.kernel.dt
+    
     @property
     def t(self):
         return self.kernel.t
+    
+    @property
+    def tc(self):
+        return self.kernel.tc
+    
+    @property
+    def ablevel(self):
+        return self.kernel.ablevel
+    
+    
+    @property
+    def qh(self):
+        return self.kernel.state.qh
+    
+    @property
+    def ph(self):
+        return self.kernel.state.ph
+    
+    @property
+    def uh(self):
+        return self.kernel.state.uh
+    
+    @property
+    def vh(self):
+        return self.kernel.state.vh
+    
+    @property
+    def u(self):
+        return self.kernel.state.u
+    
+    @property
+    def v(self):
+        return self.kernel.state.v
+    
+    @property
+    def uq(self):
+        return self.kernel.state.uq
+    
+    @property
+    def vq(self):
+        return self.kernel.state.vq
+    
+    @property
+    def uqh(self):
+        return self.kernel.state.uqh
+    
+    @property
+    def vqh(self):
+        return self.kernel.state.vqh
+    
+    @property
+    def du(self):
+        return self.kernel.state.du
+    
+    @property
+    def dv(self):
+        return self.kernel.state.dv
+    
+    @property
+    def duh(self):
+        return self.kernel.state.duh
+    
+    @property
+    def dvh(self):
+        return self.kernel.state.dvh
+    
+    @property
+    def dq(self):
+        return self.kernel.state.dq
+    
+    @property
+    def dqh(self):
+        return self.kernel.state.dqh
+    
+    @property
+    def dqhdt(self):
+        return self.kernel.state.dqhdt
+    
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
@@ -345,21 +427,21 @@ class Model(ABC):
 
         """
 
-        omega = np.zeros_like(self.wv)+0.j
+        omega = np.zeros_like(self.grid.wv)+0.j
         phi = np.zeros_like(self.qh)
 
         I = np.eye(self.grid.nz)
 
-        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
+        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.grid.wv2*I[:,:,np.newaxis,np.newaxis]
 
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
 
-        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
-        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.grid.k
+        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.grid.l
         L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
 
         if bottom_friction:
-            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
+            L3[-1,-1,:,:] += 1j*self.rek*self.grid.wv2
 
         L4 = self.a.T
 
@@ -463,6 +545,11 @@ class Model(ABC):
         self.logger.propagate = False
 
         self.logger.info(' Logger initialized')
+        
+    # Only needed for backwards compatibility with tests
+    def _invert(self):
+        _ = self.kernel.u, self.kernel.v
+        pass
 
 
     # compute advection in grid space (returns qdot in fourier space)
