@@ -110,104 +110,104 @@ class Grid:
                 
     
     
-# class ModelGrid:
-#     """
-#     Mixin for binding grid variables to the model.
-#     This code sucks! Replace it if there's an alternative
-#     """
+class ModelGrid:
+    """
+    Mixin for binding grid variables to the model.
+    This code sucks! Replace it if there's an alternative
+    """
     
-#     @property
-#     def nz(self):
-#         return self.grid.nz
+    @property
+    def nz(self):
+        return self.grid.nz
     
-#     @property
-#     def ny(self):
-#         return self.grid.ny
+    @property
+    def ny(self):
+        return self.grid.ny
     
-#     @property
-#     def nx(self):
-#         return self.grid.nx
+    @property
+    def nx(self):
+        return self.grid.nx
     
-#     @property
-#     def L(self):
-#         return self.grid.L
+    @property
+    def L(self):
+        return self.grid.L
 
-#     @property
-#     def W(self):
-#         return self.grid.W
+    @property
+    def W(self):
+        return self.grid.W
 
-#     @property
-#     def x(self):
-#         return self.grid.x
+    @property
+    def x(self):
+        return self.grid.x
     
-#     @property
-#     def y(self):
-#         return self.grid.y
+    @property
+    def y(self):
+        return self.grid.y
     
-#     @property
-#     def dk(self):
-#         return self.grid.dk
+    @property
+    def dk(self):
+        return self.grid.dk
     
-#     @property
-#     def dl(self):
-#         return self.grid.dl
+    @property
+    def dl(self):
+        return self.grid.dl
     
-#     @property
-#     def k(self):
-#         return self.grid.k
+    @property
+    def k(self):
+        return self.grid.k
     
-#     @property
-#     def l(self):
-#         return self.grid.l
+    @property
+    def l(self):
+        return self.grid.l
     
-#     @property
-#     def kk(self):
-#         return self.grid.kk
+    @property
+    def kk(self):
+        return self.grid.kk
     
-#     @property
-#     def ik(self):
-#         return self.grid.ik
+    @property
+    def ik(self):
+        return self.grid.ik
     
-#     @property
-#     def ll(self):
-#         return self.grid.ll
+    @property
+    def ll(self):
+        return self.grid.ll
     
-#     @property
-#     def il(self):
-#         return self.grid.il
+    @property
+    def il(self):
+        return self.grid.il
     
-#     @property
-#     def dx(self):
-#         return self.grid.dx
+    @property
+    def dx(self):
+        return self.grid.dx
     
-#     @property
-#     def dy(self):
-#         return self.grid.dy
+    @property
+    def dy(self):
+        return self.grid.dy
     
-#     @property
-#     def M(self):
-#         return self.grid.M
+    @property
+    def M(self):
+        return self.grid.M
     
-#     @property
-#     def wv2(self):
-#         return self.grid.wv2
+    @property
+    def wv2(self):
+        return self.grid.wv2
     
-#     @property
-#     def wv(self):
-#         return self.grid.wv
+    @property
+    def wv(self):
+        return self.grid.wv
     
-#     @property
-#     def wv2i(self):
-#         return self.grid.wv2i
+    @property
+    def wv2i(self):
+        return self.grid.wv2i
     
-#     @property
-#     def nk(self):
-#         return self.grid.nk
+    @property
+    def nk(self):
+        return self.grid.nk
     
-#     @property
-#     def nl(self):
-#         return self.grid.nl
+    @property
+    def nl(self):
+        return self.grid.nl
     
-#     @property
-#     def k2l2(self):
-#         return self.grid.k2l2
+    @property
+    def k2l2(self):
+        return self.grid.k2l2

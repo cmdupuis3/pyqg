@@ -7,8 +7,8 @@ import inspect
 from abc import ABC, abstractmethod
 
 from .errors import DiagnosticNotFilledError
-# from .grid import Grid
-from .kernel_jax import PSKernel
+from .grid import ModelGrid
+from .kernel_jax import PSKernel, KernelFFT
 from .parameterizations import Parameterization
 try:
     import mkl
@@ -22,7 +22,7 @@ try:
 except ImportError:
     pass
 
-class Model(ABC):
+class Model(ABC, ModelGrid, KernelFFT):
     """A generic pseudo-spectral inversion model.
 
     Attributes
