@@ -131,7 +131,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.grid = Grid(nz, ny, nx, L, W)
         
         self.set_q(1e-7*np.vstack([
-            np.random.randn(self.grid.nx,self.grid.ny)[np.newaxis,]
+            np.random.randn(self.nx,self.ny)[np.newaxis,]
             for _ in range(nz)]))
         
         super().__init__(grid=self.grid, f=f, **kwargs)
@@ -144,9 +144,9 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
 
-        self.S = np.zeros((self.grid.nz, self.grid.nz)) # m^-2
+        self.S = np.zeros((self.nz, self.nz)) # m^-2
 
-        if (self.grid.nz==2) and (self.rd) and (self.delta):
+        if (self.nz==2) and (self.rd) and (self.delta):
 
             self.del1 = self.delta/(self.delta+1.)
             self.del2 = (self.delta+1.)**-1
@@ -159,13 +159,13 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         else:
 
-            for i in range(self.grid.nz):
+            for i in range(self.nz):
 
                 if i == 0:
                     self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i]
                     self.S[i,i+1] =  self.f2/self.Hi[i]/self.gpi[i]
 
-                elif i == self.grid.nz-1:
+                elif i == self.nz-1:
                     self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i-1]
                     self.S[i,i-1] =  self.f2/self.Hi[i]/self.gpi[i-1]
 
@@ -180,24 +180,24 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         self.H = self.Hi.sum()
 
-        if not (self.grid.nz==2):
+        if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1] # m s^-2
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis] # m^-1
 
-            assert self.gpi.size == self.grid.nz-1, "Invalid size of gpi"
+            assert self.gpi.size == self.nz-1, "Invalid size of gpi"
 
             assert np.all(self.gpi>0.), "Buoyancy jump has negative sign!"
 
-            assert self.Hi.size == self.grid.nz, self.logger.error('size of Hi does not' +
+            assert self.Hi.size == self.nz, self.logger.error('size of Hi does not' +
                      'match number of vertical levels nz')
 
-            assert self.rhoi.size == self.grid.nz, self.logger.error('size of rhoi does not' +
+            assert self.rhoi.size == self.nz, self.logger.error('size of rhoi does not' +
                      'match number of vertical levels nz')
 
-            assert self.Ubg.size == self.grid.nz, self.logger.error('size of Ubg does not' +
+            assert self.Ubg.size == self.nz, self.logger.error('size of Ubg does not' +
                      'match number of vertical levels nz')
 
-            assert self.Vbg.size == self.grid.nz, self.logger.error('size of Vbg does not' +
+            assert self.Vbg.size == self.nz, self.logger.error('size of Vbg does not' +
                      'match number of vertical levels nz')
 
         else:
@@ -214,24 +214,24 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.grid.set__ikQy(self.Qy)
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.grid.k # m^-2 s^-1 
-        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.grid.l # m^-2 s^-1 
+        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k # m^-2 s^-1 
+        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l # m^-2 s^-1 
 
     def _initialize_inversion_matrix(self):
 
-        a = np.ma.zeros((self.grid.nz, self.grid.nz, self.grid.nl, self.grid.nk), np.dtype('float64'))
+        a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
 
-        if (self.grid.nz==2):
+        if (self.nz==2):
             det_inv =  np.ma.masked_equal(
-                    ( (self.S[0,0]-self.grid.wv2)*(self.S[1,1]-self.grid.wv2) -\
+                    ( (self.S[0,0]-self.wv2)*(self.S[1,1]-self.wv2) -\
                             self.S[0,1]*self.S[1,0] ), 0.)**-1
-            a[0,0] = (self.S[1,1]-self.grid.wv2)*det_inv
+            a[0,0] = (self.S[1,1]-self.wv2)*det_inv
             a[0,1] = -self.S[0,1]*det_inv
             a[1,0] = -self.S[1,0]*det_inv
-            a[1,1] = (self.S[0,0]-self.grid.wv2)*det_inv
+            a[1,1] = (self.S[0,0]-self.wv2)*det_inv
         else:
-            I = np.eye(self.grid.nz)[:,:,np.newaxis,np.newaxis]
-            M = self.S[:,:,np.newaxis,np.newaxis]-I*self.grid.wv2
+            I = np.eye(self.nz)[:,:,np.newaxis,np.newaxis]
+            M = self.S[:,:,np.newaxis,np.newaxis]-I*self.wv2
             M[:,:,0,0] = np.nan  # avoids singular matrix in inv()
             a = np.linalg.inv(M.T).T
 
@@ -251,7 +251,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
     def _calc_derived_fields(self):
 
         self.p = self.ifft(self.ph) # m^2 s^-1
-        self.xi =self.ifft(-self.grid.wv2*self.ph) # s^-1
+        self.xi =self.ifft(-self.wv2*self.ph) # s^-1
         self.Jpxi = self._advect(self.xi, self.u, self.v) # s^-2
         self.Jq = self._advect(self.q, self.u, self.v) # s^-2
 
@@ -270,7 +270,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('KEspec_modal',
                 description='modal kinetic energy spectra',
                 function= (lambda self:
-                    self.grid.wv2*(np.abs(self.phn)**2)/self.grid.M**2 ),
+                    self.wv2*(np.abs(self.phn)**2)/self.M**2 ),
                 units='m^2 s^-2',
                 dims=('lev','l','k')
         )
@@ -278,7 +278,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('PEspec_modal',
                 description='modal potential energy spectra',
                 function= (lambda self:
-                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.grid.M**2),
+                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
                 units='m^2 s^-2',
                 dims=('lev_mid','l','k')
         )
@@ -287,7 +287,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                 description='available potential energy spectrum',
                 function= (lambda self:
                            (self.f2gpi*
-                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.grid.M**2),
+                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-2',
                 dims=('l','k')
         )
@@ -295,7 +295,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('KEflux_div',
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.grid.M**2),
+                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
                 dims=('l','k'),
                 sums_with=['paramspec_KEflux'],
@@ -304,7 +304,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.add_diagnostic('APEflux_div',
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.grid.M**2),
+                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
                 dims=('l','k'),
                 sums_with=['paramspec_APEflux'],

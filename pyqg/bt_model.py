@@ -64,7 +64,7 @@ class BTModel(model.Model):
         self.grid = Grid(nz, ny, nx, L, W)
 
         # initial conditions: (PV anomalies)
-        self.set_q(1e-3*np.random.rand(1,self.grid.ny,self.grid.nx))
+        self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
 
         super().__init__(self.grid, **kwargs)
 
@@ -80,14 +80,14 @@ class BTModel(model.Model):
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.grid.k
+        self.ikQy = self.Qy * 1j * self.k
 
         self.ilQx = 0.
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
         # The bt model is diagonal. The inversion is simply qh = -kappa**2 ph
-        self.a = -(self.grid.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
+        self.a = -(self.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass
@@ -127,14 +127,14 @@ class BTModel(model.Model):
 
     # calculate KE: this has units of m^2 s^{-2}
     def _calc_ke(self):
-        ke = .5*self.spec_var(self.grid.wv*self.ph)
+        ke = .5*self.spec_var(self.wv*self.ph)
         return ke.sum()
 
     # calculate eddy turn over time
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
-        ens = .5*self.H * self.spec_var(self.grid.wv2*self.ph)
+        ens = .5*self.H * self.spec_var(self.wv2*self.ph)
         return 2.*pi*np.sqrt( self.H / ens ) / year
 
     # def _calc_derived_fields(self):

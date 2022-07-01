@@ -425,21 +425,21 @@ class Model(ABC, ModelGrid, KernelFFT):
 
         """
 
-        omega = np.zeros_like(self.grid.wv)+0.j
+        omega = np.zeros_like(self.wv)+0.j
         phi = np.zeros_like(self.qh)
 
-        I = np.eye(self.grid.nz)
+        I = np.eye(self.nz)
 
-        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.grid.wv2*I[:,:,np.newaxis,np.newaxis]
+        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
 
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
 
-        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.grid.k
-        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.grid.l
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
+        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
         L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
 
         if bottom_friction:
-            L3[-1,-1,:,:] += 1j*self.rek*self.grid.wv2
+            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
 
         L4 = self.a.T
 
@@ -451,8 +451,8 @@ class Model(ABC, ModelGrid, KernelFFT):
         # sorting things this way proved way
         #  more faster than using numpy's argsort() !
         imax = evals.imag.argmax(axis=0)
-        for i in range(self.grid.nl):
-            for j in range(self.grid.nk):
+        for i in range(self.nl):
+            for j in range(self.nk):
                 omega[i,j] = evals[imax[i,j],i,j]
                 phi[:,i,j] = evecs[imax[i,j],:,i,j]
 
@@ -511,7 +511,7 @@ class Model(ABC, ModelGrid, KernelFFT):
         """Set up frictional filter."""
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
-        wvx=np.sqrt((self.grid.k*self.grid.dx)**2.+(self.grid.l*self.grid.dy)**2.)
+        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
         filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         filtr[wvx<=cphi] = 1.
         self.filtr = filtr
@@ -565,8 +565,8 @@ class Model(ABC, ModelGrid, KernelFFT):
         # it does an extra unnecessary fft
         is_2d = (uq.ndim==2)
         if is_2d:
-            uq = np.tile(uq[np.newaxis,:,:], (self.grid.nz,1,1))
-            vq = np.tile(vq[np.newaxis,:,:], (self.grid.nz,1,1))
+            uq = np.tile(uq[np.newaxis,:,:], (self.nz,1,1))
+            vq = np.tile(vq[np.newaxis,:,:], (self.nz,1,1))
         tend = self.ik*self.fft(uq) + self.il*self.fft(vq)
         if is_2d:
             return tend[0]
