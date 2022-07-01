@@ -111,7 +111,6 @@ class Model(ABC):
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
-        useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
         filterfac=23.6,             # the factor for use in the exponential filter
@@ -208,7 +207,6 @@ class Model(ABC):
         self.taveint = taveint
         self.logfile = logfile
         self.log_level = log_level
-        self.useAB2 = useAB2
         self.ntd = ntd
 
         # friction
@@ -596,35 +594,6 @@ class Model(ABC):
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.t>=self.tavestart) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
-
-    # def _forward_timestep(self):
-    #     """Step forward based on tendencies"""
-    #
-    #     #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
-    #
-    #     # Note that Adams-Bashforth is not self-starting
-    #     if self.tc==0:
-    #         # forward Euler at the first step
-    #         qtend = tendency_forward_euler(self.dt, self.dqhdt)
-    #     elif (self.tc==1) or (self.useAB2):
-    #         # AB2 at step 2
-    #         qtend = tendency_ab2(self.dt, self.dqhdt, self.dqhdt_p)
-    #     else:
-    #         # AB3 from step 3 on
-    #         qtend = tendency_ab3(self.dt, self.dqhdt,
-    #                     self.dqhdt_p, self.dqhdt_pp)
-    #
-    #     # add tendency and filter
-    #     self.set_qh(self._filter(self.qh + qtend))
-    #
-    #     # remember previous tendencies
-    #     self.dqhdt_pp[:] = self.dqhdt_p.copy()
-    #     self.dqhdt_p[:] = self.dqhdt.copy()
-    #     #self.dqhdt[:] = 0.
-    #
-    #     # augment timestep and current time
-    #     self.tc += 1
-    #     self.t += self.dt
 
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
