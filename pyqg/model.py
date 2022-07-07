@@ -546,7 +546,7 @@ class Model(ABC, ModelGrid, KernelFFT):
         
     # Only needed for backwards compatibility with tests
     def _invert(self):
-        _ = self.kernel.u, self.kernel.v
+        _ = self.u, self.v
         pass
 
 
