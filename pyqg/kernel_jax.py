@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 import jax.numpy as jnp
 
+from jax.config import config
+config.update("jax_enable_x64", True)
+
 
 # Mixin pattern; we could make this abstract and then have multiple FFT types
 class KernelFFT:
