@@ -15,8 +15,8 @@ class KernelFFT:
     def fft(self, x):
         return jnp.fft.rfftn(x, axes=(-2,-1))
 
-    def ifft(self, x):
-        return jnp.fft.irfftn(x, axes=(-2,-1))
+    def ifft(self, xfft):
+        return jnp.fft.irfftn(xfft, axes=(-2,-1))
 
 
 class KernelState(KernelFFT):
@@ -45,11 +45,13 @@ class KernelState(KernelFFT):
 
     @cached_property
     def uh(self):
-        return jnp.multiply(self.ph, self.grid.il, axis=1)
+        return jnp.apply_along_axis(jnp.multiply, 1, self.ph, self.grid.il)
+        #return jnp.multiply(self.ph, self.grid.il, axis=1)
     
     @cached_property
     def vh(self):
-        return jnp.multiply(self.ph, self.grid.ik, axis=2)
+        return jnp.apply_along_axis(jnp.multiply, 2, self.ph, self.grid.ik)
+        #return jnp.multiply(self.ph, self.grid.ik, axis=2)
     
     @cached_property
     def qh(self):
@@ -111,12 +113,12 @@ class KernelState(KernelFFT):
     def dqhdt(self):
         k = self.grid.nz-1
         
-        adv = - ( jnp.multiply(self.uqh, self.grid.ik, axis=2) +
-                  jnp.multiply(self.vqh, self.grid.il, axis=1) +
+        adv = - ( jnp.apply_along_axis(jnp.multiply, 2, self.uqh, self.grid.ik) +
+                  jnp.apply_along_axis(jnp.multiply, 1, self.vqh, self.grid.il) +
                   jnp.multiply(self.ph,  self.grid._ikQy, axes = [0,2]) # check axes!
                 )
-        uv_par = lambda x: x + ( jnp.multiply(self.dvh, self.grid.ik, axis=2) -
-                                 jnp.multiply(self.duh, self.grid.il, axis=1) )
+        uv_par = lambda x: x + ( jnp.apply_along_axis(jnp.multiply, 2, self.dvh, self.grid.ik) -
+                                 jnp.apply_along_axis(jnp.multiply, 1, self.duh, self.grid.il) )
         q_par  = lambda x: x + self.dqh
         fric   = lambda x: x + self.rek*(self.grid.k2l2 * self.ph[k])
         
@@ -147,13 +149,8 @@ class KernelState(KernelFFT):
                 return adv
 
 class PSKernel(KernelFFT):
-    
-    def _empty_real(self):
-        """Allocate a space-grid-sized variable for use with fftw transformations."""
-        return jnp.zeros((self.grid.nz, self.grid.ny, self.grid.nx), jnp.float32) # float64
 
     def _empty_com(self):
-        """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         return jnp.zeros((self.grid.nz, self.grid.nl, self.grid.nk), jnp.complex64) # complex128
     
     def __init__(self, q, Ubg, a, grid, rek = 0.0, uv_par = None, q_par = None):
